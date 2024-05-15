@@ -1,2 +1,0 @@
-Player: Прес
-Role: Mafia
