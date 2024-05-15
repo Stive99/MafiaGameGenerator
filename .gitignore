@@ -1,0 +1,28 @@
+# Compiled source #
+.vs
+
+# Compiled object files
+*.o
+*.obj
+
+# Compiled dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Executables
+*.exe
+
+# Build directories
+build
+bin
+x64
+
+# IDE-specific files
+.vscode/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+
+# Dependency directories
+lib/
