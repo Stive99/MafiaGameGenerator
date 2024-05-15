@@ -1,5 +1,6 @@
 # Compiled source #
 .vs
+.vscode
 
 # Compiled object files
 *.o
@@ -17,12 +18,6 @@
 build
 bin
 x64
-
-# IDE-specific files
-.vscode/
-*.sln
-*.vcxproj
-*.vcxproj.filters
 
 # Dependency directories
 lib/
