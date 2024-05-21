@@ -7,12 +7,15 @@
 #include <ctime>
 #include <locale>
 #include <codecvt>
+#include <climits>
 
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include <corecrt_io.h>
+#include <fcntl.h>
 
-enum Role { Mafia, Civilian, Detective, Doctor };
+enum Role { Mafia, Civilian, Detective, Doctor, Don };
 
 // Функция для преобразования роли в строку
 std::wstring roleToString(Role role) {
@@ -21,17 +24,23 @@ std::wstring roleToString(Role role) {
 		case Civilian: return L"Мирный";
 		case Detective: return L"Детектив";
 		case Doctor: return L"Доктор";
+		case Don: return L"Мафия (Дон)";
 	}
 	return L"";
 }
 
 void assignRoles(int numPlayers, std::vector<Role>& roles) {
 	int numMafias = numPlayers / 3;
+	// std::max(1, numPlayers / 6); | (std::max)(1, numPlayers / 6);
 	int numDetectives = 1;
 	int numDoctors = 1;
+	int numDons = (numMafias > 1) ? 1 : 0;
 
-	for (int i = 0; i < numMafias; ++i) {
+	for (int i = 0; i < numMafias - numDons; ++i) {
 		roles[i] = Mafia;
+	}
+	if (numDons == 1) {
+		roles[numMafias - 1] = Don;
 	}
 	for (int i = numMafias; i < numMafias + numDetectives; ++i) {
 		roles[i] = Detective;
@@ -47,6 +56,10 @@ void assignRoles(int numPlayers, std::vector<Role>& roles) {
 }
 
 void createFilesAndPrintRoles(const std::vector<std::wstring>& players, const std::vector<Role>& roles) {
+#ifdef _WIN32
+	SetConsoleOutputCP(CP_UTF8);
+#endif
+
 	for (size_t i = 0; i < players.size(); ++i) {
 		try {
 			std::wstring fileName = players[i] + L".txt";
@@ -54,12 +67,9 @@ void createFilesAndPrintRoles(const std::vector<std::wstring>& players, const st
 			if (!outFile) {
 				throw std::ios_base::failure("Ошибка открытия файла");
 			}
-			// Установить локаль на UTF-8
 			outFile.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t>));
-			// Записать данные в файл
 			outFile << L"Игрок: " << players[i] << L"\n" << L"Роль: " << roleToString(roles[i]) << std::endl;
 			outFile.close();
-			// Вывести данные в консоль
 			std::wcout << L"Игрок: " << players[i] << L"\n" << L"Роль: " << roleToString(roles[i]) << std::endl;
 		} catch (const std::exception& e) {
 			std::wcerr << L"Исключение: " << e.what() << L" для игрока: " << players[i] << std::endl;
@@ -119,7 +129,7 @@ int main() {
 	std::cout << std::endl;
 	std::wcout << L"Нажмите Enter для выхода...";
 	std::wcin.ignore(INT_MAX, '\n');
-	std::wcin.get(); // Ожидать нажатия Enter
+	std::wcin.get();
 
 	return 0;
 }
