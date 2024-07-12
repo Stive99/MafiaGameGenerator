@@ -45,7 +45,7 @@ static void assignRoles(int numPlayers, std::vector<Role>& roles) {
         roles[i] = Mafia;
     }
     if (numDons == 1) {
-        roles[numMafias - 1] = Don;
+        roles[static_cast<std::vector<Role, std::allocator<Role>>::size_type>(numMafias) - 1] = Don;
     }
     for (int i = numMafias; i < numMafias + numDetectives; ++i) {
         roles[i] = Detective;
@@ -62,50 +62,30 @@ static void assignRoles(int numPlayers, std::vector<Role>& roles) {
 
 // Функция для создания файлов и вывода ролей
 static void createFilesAndPrintRoles(const std::vector<std::wstring>& players, const std::vector<Role>& roles) {
-#ifdef _WIN32
-    if (_setmode(_fileno(stdin), _O_WTEXT) == -1) {
-        wcerr << L"Не удалось установить режим для stdin" << endl;
-        return;
-    }
-    if (_setmode(_fileno(stdout), _O_WTEXT) == -1) {
-        wcerr << L"Не удалось установить режим для stdout" << endl;
-        return;
-    }
-    if (_setmode(_fileno(stderr), _O_WTEXT) == -1) {
-        wcerr << L"Не удалось установить режим для stderr" << endl;
-        return;
-    }
-    if (_setmode(_fileno(stdin), _O_U16TEXT) == -1) {
-        wcerr << L"Не удалось установить режим для stdin" << endl;
-        return;
-    }
-    if (_setmode(_fileno(stdout), _O_U16TEXT) == -1) {
-        wcerr << L"Не удалось установить режим для stdout" << endl;
-        return;
-    }
-    if (_setmode(_fileno(stderr), _O_U16TEXT) == -1) {
-        wcerr << L"Не удалось установить режим для stderr" << endl;
-        return;
-    }
-#endif
-
-    //std::locale loc(std::locale(), new std::codecvt_utf8_utf16<wchar_t>);
     std::locale loc("en_US.UTF-8");
-    //std::wcout.imbue(loc);
-    //std::wcin.imbue(loc);
-    //std::wcerr.imbue(loc);
 
     for (size_t i = 0; i < players.size(); ++i) {
         try {
             std::wstring fileName = players[i] + L".txt";
             std::wofstream outFile(fileName);
-            //outFile.imbue(loc);
-            //outFile.imbue(std::locale(std::locale(), new std::codecvt_utf8<wchar_t, 0x10ffff, std::consume_header>));
-            if (!outFile) {
+
+            if (!outFile.is_open()) {
                 throw std::ios_base::failure("Ошибка открытия файла");
             }
+
+            outFile.imbue(loc);
             outFile << L"Игрок: " << players[i] << L"\n" << L"Роль: " << roleToString(roles[i]) << std::endl;
+
+            if (outFile.fail()) {
+                throw std::ios_base::failure("Ошибка записи в файл");
+            }
+
             outFile.close();
+
+            if (outFile.fail()) {
+                throw std::ios_base::failure("Ошибка закрытия файла");
+            }
+
             std::wcout << L"Игрок: " << players[i] << L"\n" << L"Роль: " << roleToString(roles[i]) << std::endl;
         }
         catch (const std::exception& e) {
@@ -149,10 +129,6 @@ int main() {
         setlocale(LC_ALL, "");
 
 #ifdef _WIN32
-        //_setmode(_fileno(stdin), _O_U16TEXT);
-        //_setmode(_fileno(stdout), _O_U16TEXT);
-        //_setmode(_fileno(stderr), _O_U16TEXT);
-
         if (_setmode(_fileno(stdin), _O_WTEXT) == -1) {
             wcerr << L"Не удалось установить режим для stdin" << endl;
             return 1;
@@ -165,23 +141,8 @@ int main() {
             wcerr << L"Не удалось установить режим для stderr" << endl;
             return 1;
         }
-        if (_setmode(_fileno(stdin), _O_U16TEXT) == -1) {
-            wcerr << L"Не удалось установить режим для stdin" << endl;
-            return 1;
-        }
-        if (_setmode(_fileno(stdout), _O_U16TEXT) == -1) {
-            wcerr << L"Не удалось установить режим для stdout" << endl;
-            return 1;
-        }
-        if (_setmode(_fileno(stderr), _O_U16TEXT) == -1) {
-            wcerr << L"Не удалось установить режим для stderr" << endl;
-            return 1;
-        }
 
-        // Установить название окна
         SetConsoleTitle(L"Mafia Game Generator");
-
-        // Центрирование окна консоли
         centerConsoleWindow();
 #endif
 
