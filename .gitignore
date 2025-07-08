@@ -21,3 +21,8 @@ x64
 
 # Dependency directories
 lib/
+
+# Added by cargo
+
+/target
+Cargo.lock

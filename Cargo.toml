@@ -1,0 +1,9 @@
+[package]
+name = "MafiaGameGenerator"
+version = "0.1.0"
+edition = "2024"
+repository = "https://github.com/Stive99/MafiaGameGenerator"
+
+[dependencies]
+rand = "0.9.1"
+self_update = "0.42.0"
