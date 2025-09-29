@@ -1,5 +1,6 @@
 use std::fmt;
 use std::num::ParseIntError;
+use std::env::VarError;
 
 #[derive(Debug)]
 pub enum AppError {
@@ -22,11 +23,11 @@ pub enum AppError {
 	/// Имя игрока уже используется.
 	DuplicatePlayerName(String),
 
-	/// Неверный выбор в меню. Хранит введенное значение.
-	InvalidMenuChoice(String),
-
 	/// Ошибка при обновлении конфигурации приложения.
 	UpdateConfig(String),
+
+	/// Недопустимое имя файла (возможная попытка path traversal).
+	InvalidFileName(String),
 }
 
 impl fmt::Display for AppError {
@@ -36,7 +37,7 @@ impl fmt::Display for AppError {
 			AppError::ParseInt(_) => write!(f, "Ошибка ввода: ожидалось целое число."),
 			AppError::InvalidPlayerCount { given, min, max } => write!(
 				f,
-				"Ошибка конфигурации: для игры требуется от {min} до {max} игроков. Вы ввели: {given}."
+				"Ошибка конфигурации: для игры требуется от {min} до {max} игроков. Вы введи: {given}."
 			),
 			AppError::EmptyPlayerName => write!(f, "Ошибка ввода: имя игрока не может быть пустым."),
 			AppError::InvalidCharactersInName(name) => write!(
@@ -47,12 +48,12 @@ impl fmt::Display for AppError {
 				f,
 				"Ошибка ввода: игрок с именем '{name}' уже существует.",
 			),
-			AppError::InvalidMenuChoice(input) => {
-                write!(f, "Ошибка ввода: '{input}' - неверный выбор в меню.")
-            },
-            AppError::UpdateConfig(msg) => {
-                write!(f, "Ошибка конфигурации обновления: {msg}")
-            }
+			AppError::UpdateConfig(msg) => {
+				write!(f, "Ошибка конфигурации обновления: {msg}")
+			},
+			AppError::InvalidFileName(name) => {
+				write!(f, "Ошибка безопасности: имя файла '{name}' недопустимо.")
+			}
 		}
 	}
 }
@@ -77,5 +78,14 @@ impl From<std::io::Error> for AppError {
 impl From<ParseIntError> for AppError {
 	fn from(err: ParseIntError) -> Self {
 		AppError::ParseInt(err)
+	}
+}
+
+impl From<VarError> for AppError {
+	fn from(err: VarError) -> Self {
+		match err {
+			VarError::NotPresent => AppError::UpdateConfig("Переменная окружения не найдена.".to_string()),
+			VarError::NotUnicode(_) => AppError::UpdateConfig("Переменная окружения содержит недопустимые символы.".to_string()),
+		}
 	}
 }

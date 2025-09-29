@@ -1,9 +1,21 @@
 [package]
 name = "MafiaGameGenerator"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
-repository = "https://github.com/Stive99/MafiaGameGenerator"
 
 [dependencies]
-rand = "0.9.1"
-self_update = "0.42.0"
+rand = { version = "0.9.2", default-features = false, features = ["std", "std_rng", "thread_rng"] }
+reqwest = { version = "0.12.23", default-features = false, features = ["rustls-tls"] }
+serde = { version = "1.0.228", default-features = false, features = ["derive"] }
+tokio = { version = "1.47.1", default-features = false, features = ["rt-multi-thread", "macros"] }
+toml = { version = "0.9.7", default-features = false, features = ["parse", "serde"] }
+clap = { version = "4.5.23", default-features = false, features = ["derive", "std", "help", "usage", "error-context"] }
+fs2 = "0.4.3"
+
+[profile.release]
+opt-level = 'z'
+debug = false
+strip = true
+lto = true
+codegen-units = 1
+panic = 'abort'
